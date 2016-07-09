@@ -61,14 +61,15 @@ public class PicPlayer {
 	private JMenuItem openItem;
 	private JMenuItem exitItem;
 	private JMenuItem aboutItem;
-	private JMenuItem settingItem;
+	private JMenuItem howtoItem;
+	private JMenuItem imageSettingItem;
 	// Panel
 	private JScrollPane jsp;
 	private JPanel imagepanel;
 	private JPanel processPanel;
 	private JLabel label;
 	private ImageIcon imgIcon;
-	private String title = "零五计算机－Forever";
+	private String title = "这是一个简单的图片和音频播放器，如果不会用，点击setting->how to，这里有使用说明－Forever";
 	private Image image;
 	private String imageFilePath = "";
 	private File[] files;
@@ -97,20 +98,11 @@ public class PicPlayer {
 
 	private GridBagLayout gridBagLayout = new GridBagLayout();
 
-	static {
-		String libpath = System.getProperty("java.library.path");
-//    	libpath = libpath + "/usr/local/lib";
-//    	System.setProperty("java.library.path",libpath);
-    	System.out.println("TTT:" + libpath);
-    	System.loadLibrary("casampledsp");
-//		System.load("/usr/local/lib/casampledsp-0.9.11.dylib");
-//		System.loadLibrary("casampledsp-0.9.11.dylib");
-//		System.load("/Users/luchenghao/.m2/repository/com/tagtraum/casampledsp/0.9.11/casampledsp-0.9.11.dylib");
-	}
 	public PicPlayer() {
-//		System.loadLibrary("casampledsp-0.9.11.dylib");
-//		System.setProperty("java.library.path", "/Users/luchenghao/.m2/repository/com/tagtraum/casampledsp/0.9.11/");
-//		System.load("/Users/luchenghao/.m2/repository/com/tagtraum/casampledsp/0.9.11/casampledsp-0.9.11.dylib");
+		String libpath = System.getProperty("java.library.path");
+		System.out.println("TTT:" + libpath);
+//    	System.loadLibrary("casampledsp");
+//		System.load("/usr/local/lib/casampledsp-0.9.11.dylib");
 		initComponent();
 	}
 
@@ -136,7 +128,8 @@ public class PicPlayer {
 
 		exitItem = new JMenuItem("Exit");
 		aboutItem = new JMenuItem("About Author");
-		settingItem = new JMenuItem("Setting");
+		howtoItem = new JMenuItem("how to");
+		imageSettingItem = new JMenuItem("Pictures Path Setting");
 
 		exitItem.addActionListener(new ActionListener() {
 			@Override
@@ -148,24 +141,64 @@ public class PicPlayer {
 		aboutItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				javax.swing.JOptionPane.showMessageDialog(frame, "Author:Luchenghao \nmailto:luch2046@gmail.com",
 						"关于作者", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 
-		settingItem.addActionListener(new ActionListener() {
+		howtoItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				javax.swing.JOptionPane.showConfirmDialog(frame, "Author: Luchenghao \nmailto:luch2046@gmail.com",
-						"关于作者", JOptionPane.PLAIN_MESSAGE);
+				javax.swing.JOptionPane.showConfirmDialog(frame, "使用很简单，就两步操作：\n 1. 在Setting->Pic Path Chooser 指定一个本地电脑有.jpg/.gif/.png文件的一个目录，用来播放图片。\n 2. 在窗口上部的Open File 按钮上选中一个mp3文件，用来播放音频。 \n 就这么简单。",
+						"关于使用", JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		
+		imageSettingItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser();
+				FileFilter fileFilter = new FileFilter(){
+
+					@Override
+					public boolean accept(File f) {
+						// TODO Auto-generated method stub
+						if(f.isDirectory()) return true;
+						else {
+							log.info("＃＃＃＃" +f.getName());
+							return f.getName().toLowerCase().endsWith(".png")
+									|| f.getName().toLowerCase().endsWith(".jpg");
+						}
+					}
+
+					@Override
+					public String getDescription() {
+						// TODO Auto-generated method stub
+						return "Image Support(*.png/gif/jpg)";
+					}
+				};
+				fc.setFileFilter(fileFilter);
+				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fc.setDialogTitle("Please Select A Folder");
+				fc.setAcceptAllFileFilterUsed(false);
+				int userChoice = fc.showOpenDialog(frame);
+				if (userChoice == JFileChooser.APPROVE_OPTION) {
+					log.info("i am in the imageSettingItems!");
+					log.info(fc.getSelectedFile().getAbsolutePath() + "$$$$$$" + fc.getSelectedFile().getName());
+					imageFilePath = fc.getSelectedFile().getAbsolutePath();
+					image = Toolkit.getDefaultToolkit().getImage(imageFilePath);
+					File file = new File(imageFilePath);
+					files = file.listFiles(new PicFilter());
+					playPic();
+				}
+				
 			}
 		});
 
 		fileMenu.add(exitItem);
 		aboutMenu.add(aboutItem);
-		settingMenu.add(settingItem);
+		settingMenu.add(howtoItem);
+		settingMenu.add(imageSettingItem);
 
 		label = new JLabel();
 		imagepanel = new JPanel();
@@ -192,10 +225,8 @@ public class PicPlayer {
 					fileChooser = new JFileChooser();
 				}
 				FileFilter wavFilter = new FileFilter() {
-
 					@Override
 					public boolean accept(File f) {
-						// TODO Auto-generated method stub
 						if (f.isDirectory()) {
 							return true;
 						} else {
@@ -206,7 +237,6 @@ public class PicPlayer {
 
 					@Override
 					public String getDescription() {
-						// TODO Auto-generated method stub
 						return "Sound file (*.wav/mp3)";
 					}
 				};
@@ -219,6 +249,16 @@ public class PicPlayer {
 					audioFilePath = fileChooser.getSelectedFile().getAbsolutePath();
 					log.info("audioFilePath:" + audioFilePath);
 					lastOpenPath = fileChooser.getSelectedFile().getParent();
+					if (isPlaying || isPause) {
+						stopPlaying();
+						while (player.getAudioClip().isRunning()) {
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException ex) {
+								ex.printStackTrace();
+							}
+						}
+					}
 					playback();
 				}
 			}
@@ -234,6 +274,19 @@ public class PicPlayer {
 				} else {
 					stopPlaying();
 				}
+			}
+		});
+		
+		btnPause.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!isPause) {
+					pausePlaying();
+				} else {
+					resumePlaying();
+				}
+				
 			}
 		});
 		
@@ -280,6 +333,7 @@ public class PicPlayer {
 		frame.add(jsp, BorderLayout.CENTER);
 		image = Toolkit.getDefaultToolkit().getImage(imageFilePath);
 		File file = new File(imageFilePath);
+		System.out.println("imageFilePath:" + imageFilePath);
 		files = file.listFiles(new PicFilter());
 
 		frame.setLocationRelativeTo(null);
@@ -292,38 +346,50 @@ public class PicPlayer {
 	}
 
 	protected void stopPlaying() {
-		// TODO Auto-generated method stub
 		isPause = false;
 		btnPause.setText("Pause");
 		btnPause.setEnabled(false);
 		timer.reset();
 		timer.interrupt();
-		
+		player.stop();
 		playbackThread.interrupt();
 	}
 
+	
+	private void pausePlaying() {
+		btnPause.setText("Resume");
+		isPause = true;
+		player.pause();
+		timer.pauseTimer();
+		playbackThread.interrupt();
+	}
+	
+	private void resumePlaying() {
+		btnPause.setText("Pause");
+		isPause = false;
+		player.resume();
+		timer.resumeTimer();
+		playbackThread.interrupt();		
+	}
 	PlayingTimer timer;
 	private boolean isPlaying = false;
 	private boolean isPause = false;
 	Thread playbackThread;
 	protected void playback() {
-		// TODO Auto-generated method stub
 		timer = new PlayingTimer(labelTimeCounter, sliderTime);
 		timer.start();
 		isPlaying = true;
 		playbackThread = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				try {
 					btnPlay.setText("Stop");
 					btnPlay.setEnabled(true);
 
 					btnPause.setText("Pause");
 					btnPause.setEnabled(true);
-					mp3path = audioFilePath;
-					player.load(mp3path);
+//					mp3path = audioFilePath;
+					player.load(audioFilePath);
 //					FileInputStream fis = new FileInputStream(mp3path);
 //					BufferedInputStream bis = new BufferedInputStream(fis);
 //					player = new javazoom.jl.player.Player(bis);
@@ -334,9 +400,21 @@ public class PicPlayer {
 					labelDuration.setText(player.getClipLengthString());
 					player.play();
 					resetControls();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				}  catch (UnsupportedAudioFileException ex) {
+					JOptionPane.showMessageDialog(frame,  
+							"The audio format is unsupported!", "Error", JOptionPane.ERROR_MESSAGE);
+					resetControls();
+					ex.printStackTrace();
+				} catch (LineUnavailableException ex) {
+					JOptionPane.showMessageDialog(frame,  
+							"Could not play the audio file because line is unavailable!", "Error", JOptionPane.ERROR_MESSAGE);
+					resetControls();
+					ex.printStackTrace();
+				} catch (IOException ex) {
+					JOptionPane.showMessageDialog(frame,  
+							"I/O error while playing the audio file!", "Error", JOptionPane.ERROR_MESSAGE);
+					resetControls();
+					ex.printStackTrace();
 				}
 			}
 
@@ -346,16 +424,14 @@ public class PicPlayer {
 	}
 
 	protected void resetControls() {
-		// TODO Auto-generated method stub
 		timer.reset();
 		timer.interrupt();
 		btnPlay.setText("Play");
-		btnPlay.setEnabled(false);
+		btnPause.setEnabled(false);
 		isPlaying = false;
 	}
 
 	protected String getClipLengthString() {
-		// TODO Auto-generated method stub
 		String length = "“";
 		long hour = 0;
 		long minute = 0;
@@ -431,7 +507,6 @@ public class PicPlayer {
 
 	private void playMp3() {
 		log.info("Mp3 location:" + mp3path);
-		// TODO Auto-generated method stub
 		isStop = true;
 		while (!hasStop) {
 			log.info(".");
@@ -472,16 +547,10 @@ public class PicPlayer {
 
 	class PlayMp3Thread implements Runnable {
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Runnable#run()
-		 */
 		byte tempBuffer[] = new byte[320];
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			int cnt;
 			hasStop = false;
 			// 读取数据到缓存数据
@@ -504,7 +573,6 @@ public class PicPlayer {
 					playMp3();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -513,21 +581,15 @@ public class PicPlayer {
 	}
 
 	private void playPic() {
-		// TODO Auto-generated method stub
 		Thread play = new Thread(new PlayPicThread());
 		play.start();
 	}
 
 	class PlayPicThread implements Runnable {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Runnable#run()
-		 */
 		@Override
 		public void run() {
 			isPicPlayEnd = false;
+			System.out.println("files:"+ files);
 			log.info("Image Size:" + files.length);
 			for (int i = 0; i < files.length; i++) {
 				currentFile = files[i];
@@ -536,7 +598,6 @@ public class PicPlayer {
 				try {
 					Thread.sleep(15000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				setImage(currentFile, isActionFlag);
@@ -587,12 +648,10 @@ public class PicPlayer {
 		}
 
 		private Image setFixed(File currentFile, int iw, int ih) {
-			// TODO Auto-generated method stub
 			BufferedImage bi = null;
 			try {
 				bi = javax.imageio.ImageIO.read(currentFile);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return bi.getScaledInstance(iw, ih, Image.SCALE_SMOOTH);

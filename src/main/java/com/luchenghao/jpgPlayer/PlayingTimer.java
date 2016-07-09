@@ -46,7 +46,7 @@ public class PlayingTimer extends Thread {
 				if(!isPause){
 					if(audioPlayer != null && audioPlayer.isRunning()) {
 						labelRecordTime.setText(toTimeString());
-						int currentSecond = (int) audioPlayer.getMicrosecondPosition()/1_000;
+						int currentSecond = (int) audioPlayer.getMicrosecondPosition()/1_000_000;
 						slider.setValue(currentSecond);
 					}
 				} else {
