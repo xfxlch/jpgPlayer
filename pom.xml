@@ -28,26 +28,48 @@
 			<version>1.2.17</version>
 		</dependency>
 
-		<dependency>
-			<groupId>javazoom.net</groupId>
-			<artifactId>jlayer</artifactId>
-			<version>1.0.1</version>
-		</dependency>
- 
+		<!-- <dependency> -->
+		<!-- <groupId>javazoom.net</groupId> -->
+		<!-- <artifactId>jlayer</artifactId> -->
+		<!-- <version>1.0.1</version> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>com.tagtraum</groupId> -->
+		<!-- <artifactId>casampledsp</artifactId> -->
+		<!-- <version>0.9.11</version> -->
+		<!-- <type>dylib</type> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>com.tagtraum</groupId> -->
+		<!-- <artifactId>casampledsp-java</artifactId> -->
+		<!-- <version>0.9.11</version> -->
+		<!-- <type>jar</type> -->
+		<!-- </dependency> -->
+
 		<dependency>
 			<groupId>com.tagtraum</groupId>
-			<artifactId>casampledsp-x86_64</artifactId>
-			<version>0.9.11</version>
-			<type>dylib</type>
+			<artifactId>mfsampledsp</artifactId>
+			<version>0.9.6</version>
+			<type>jar</type>
 		</dependency>
-		
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.tagtraum</groupId> -->
-<!-- 			<artifactId>casampledsp-java</artifactId> -->
-<!-- 			<version>0.9.11</version> -->
-<!-- 			<type>jar</type> -->
-<!-- 		</dependency> -->
-
+		<dependency>
+			<groupId>com.tagtraum</groupId>
+			<artifactId>mfsampledsp</artifactId>
+			<version>0.9.6</version>
+			<type>dll</type>
+<!-- 			32 bit dll -->
+			<classifier>i386</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.tagtraum</groupId>
+			<artifactId>mfsampledsp</artifactId>
+			<version>0.9.6</version>
+			<type>dll</type>
+			<!-- 64 bit dll -->
+			<classifier>x86_64</classifier>
+		</dependency>
 
 	</dependencies>
 
@@ -70,19 +92,102 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-shade-plugin</artifactId> -->
+			<!-- <version>2.4.3</version> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <phase>package</phase> -->
+			<!-- <goals> -->
+			<!-- <goal>shade</goal> -->
+			<!-- </goals> -->
+			<!-- <configuration> -->
+			<!-- <transformers> -->
+			<!-- <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"> -->
+			<!-- <mainClass>com.luchenghao.jpgPlayer.App</mainClass> -->
+			<!-- </transformer> -->
+			<!-- </transformers> -->
+			<!-- </configuration> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- </plugin> -->
+
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-jar-plugin</artifactId> -->
+			<!-- <version>2.4</version> -->
+			<!-- <configuration> -->
+			<!-- <archive> -->
+			<!-- <index>true</index> -->
+			<!-- <manifest> -->
+			<!-- <addClasspath>true</addClasspath> -->
+			<!-- <mainClass>com.luchenghao.jpgPlayer.App</mainClass> -->
+			<!-- </manifest> -->
+			<!-- </archive> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
+<!-- 			<plugin> -->
+<!-- 				mvn package appassembler:assemble -->
+<!-- 				<groupId>org.codehaus.mojo</groupId> -->
+<!-- 				<artifactId>appassembler-maven-plugin</artifactId> -->
+<!-- 				<version>1.10</version> -->
+<!-- 				<configuration> -->
+<!-- 					Set the target configuration directory to be used in the bin scripts -->
+<!-- 	          		<configurationDirectory>conf</configurationDirectory> -->
+<!-- 	          		<copyConfigurationDirectory>true</copyConfigurationDirectory> -->
+<!-- 			        Include the target configuration directory in the beginning of -->
+<!-- 			               the classpath declaration in the bin scripts -->
+<!-- 			        <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath> -->
+<!-- 					<assembleDirectory>${project.build.directory}/JpgPlayer</assembleDirectory> -->
+<!-- 					<repositoryLayout>flat</repositoryLayout> -->
+<!-- 					<extraJvmArguments>-Xms128m</extraJvmArguments> -->
+<!-- 					<platforms> -->
+<!-- 			            <platform>windows</platform> -->
+<!-- 			            <platform>unix</platform> -->
+<!-- 			        </platforms> -->
+<!-- 					<programs> -->
+<!-- 						<program> -->
+<!-- 							<mainClass>com.luchenghao.jpgPlayer.App</mainClass> -->
+<!-- 							<id>jpgPlayer</id> -->
+<!-- 							<platforms> -->
+<!-- 				                <platform>windows</platform> -->
+<!-- 				            </platforms> -->
+<!-- 						</program> -->
+<!-- 					</programs> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.luchenghao.jpgPlayer.App</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+<!-- 					<descriptors> -->
+<!-- 						<descriptor>src/main/resource/assembly.xml</descriptor> -->
+<!-- 					</descriptors> -->
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>env-mp3</id>
-			<repositories>
-				<repository>
-					<id>beatunes</id>
-					<name>beaTunes Repository</name>
-					<url>https://www.beatunes.com/repo/maven2</url>
-				</repository>
-			</repositories>
-		</profile>
-	</profiles>
+	<!-- <profiles> -->
+	<!-- <profile> -->
+	<!-- <id>env-casampledsp</id> -->
+	<!-- <repositories> -->
+	<!-- <repository> -->
+	<!-- <id>beatunes</id> -->
+	<!-- <name>beaTunes Repository</name> -->
+	<!-- <url>https://www.beatunes.com/repo/maven2</url> -->
+	<!-- </repository> -->
+	<!-- </repositories> -->
+	<!-- </profile> -->
+	<!-- </profiles> -->
 </project>
