@@ -14,9 +14,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 import javax.sound.sampled.AudioFormat;
@@ -85,7 +83,7 @@ public class PicPlayer {
 	private boolean isStop = true;// control the play thread
 	private boolean hasStop = true; // display the play thread status
 	private String lastOpenPath;
-	private String audioFilePath;
+	private String audioFilePath="untilTheEndOfTheWorld.mp3";
 
 	JLabel labelFileName;
 	JLabel labelTimeCounter;
@@ -102,19 +100,22 @@ public class PicPlayer {
 		String libpath = System.getProperty("java.library.path");
 		System.out.println("TTT:" + libpath);
 //    	System.loadLibrary("casampledsp");
-//		System.load("/usr/local/lib/casampledsp-0.9.11.dylib");
 		initComponent();
 	}
 
 	private void initComponent() {
 		log.info("Here we are in initComponent method.");
-		imageFilePath = System.getProperty("user.dir") + File.separatorChar + "/src/main/resource/images";
+		String cp = "/images";
+
+		System.out.println( getClass().getResource("/images"));
+		imageFilePath = getClass().getResource("/images").getPath();// "src/main/resources/images";//System.getProperty("user.dir") + File.separatorChar + 
 		log.info("Image File Path:" + imageFilePath);
-		mp3path = imageFilePath + File.separatorChar + "Bo-toxx mind Society-Cheeno.mp3";
+		//mp3path = imageFilePath + File.separatorChar + "Bo-toxx mind Society-Cheeno.mp3";
 		frame = new JFrame();
 		frame.setSize(WIDTH, HEIGHT);
 		int w = (Toolkit.getDefaultToolkit().getScreenSize().width - WIDTH) / 2;
 		int h = (Toolkit.getDefaultToolkit().getScreenSize().height - HEIGHT) / 2;
+		System.out.println("x:" + w + ", y:" +h );
 		frame.setLocation(w, h);
 		frame.setTitle(title);
 		menubar = new JMenuBar();
@@ -165,7 +166,7 @@ public class PicPlayer {
 						// TODO Auto-generated method stub
 						if(f.isDirectory()) return true;
 						else {
-							log.info("＃＃＃＃" +f.getName());
+							log.info("###" +f.getName());
 							return f.getName().toLowerCase().endsWith(".png")
 									|| f.getName().toLowerCase().endsWith(".jpg");
 						}
@@ -191,7 +192,6 @@ public class PicPlayer {
 					files = file.listFiles(new PicFilter());
 					playPic();
 				}
-				
 			}
 		});
 
@@ -334,6 +334,7 @@ public class PicPlayer {
 		image = Toolkit.getDefaultToolkit().getImage(imageFilePath);
 		File file = new File(imageFilePath);
 		System.out.println("imageFilePath:" + imageFilePath);
+		//files = new File[]{new File("com/luchenghao/jpgPlayer/images/IMG_1751.JPG"), new File("com/luchenghao/jpgPlayer/images/IMG_1752.JPG")};//
 		files = file.listFiles(new PicFilter());
 
 		frame.setLocationRelativeTo(null);
@@ -342,7 +343,9 @@ public class PicPlayer {
 		frame.setResizable(false);// disable the max button
 		playPic();
 		// playMp3();
-		// playMusic();
+		audioFilePath =  getClass().getResource("/").getPath() + audioFilePath;
+		System.out.println("Test Path:" + getClass().getResource("/").getPath());
+		playback();
 	}
 
 	protected void stopPlaying() {
@@ -656,7 +659,5 @@ public class PicPlayer {
 			}
 			return bi.getScaledInstance(iw, ih, Image.SCALE_SMOOTH);
 		}
-
 	}
-
 }
