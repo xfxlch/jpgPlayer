@@ -2,6 +2,7 @@ package com.luchenghao.jpgPlayer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -49,7 +50,7 @@ public class AudioPlayer implements LineListener {
 			throws UnsupportedAudioFileException, IOException,
 			LineUnavailableException {
 		File audioFile = new File(audioFilePath);
-
+//		System.out.println("audioFilePath:" + audioFilePath.getPath());
 		AudioInputStream audioStream = AudioSystem
 				.getAudioInputStream(audioFile);
 

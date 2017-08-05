@@ -1,14 +1,16 @@
 package com.luchenghao.jpgPlayer;
 
+import org.apache.log4j.Logger;
+
 /**
- * Hello world!
- *
+ * App Class
  */
 public class App 
 {
+	private static Logger log = Logger.getLogger(App.class);
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
-        new  PicPlayer();
+    	log.info( "Hello World!" );
+        new PicPlayer();
     }
 }

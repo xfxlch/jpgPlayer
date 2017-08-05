@@ -16,6 +16,10 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.security.CodeSource;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -45,6 +49,8 @@ import org.apache.log4j.Logger;
  *
  */
 public class PicPlayer {
+	
+	private static final String CLASS = "PicPlayer";
 	private static final int SECONDS_IN_HOUR = 60 * 60;
 	private static final int SECONDS_IN_MINUTE = 60;
 
@@ -56,7 +62,6 @@ public class PicPlayer {
 	private JMenu fileMenu;
 	private JMenu aboutMenu;
 	private JMenu settingMenu;
-	private JMenuItem openItem;
 	private JMenuItem exitItem;
 	private JMenuItem aboutItem;
 	private JMenuItem howtoItem;
@@ -68,11 +73,11 @@ public class PicPlayer {
 	private JLabel label;
 	private ImageIcon imgIcon;
 	private String title = "这是一个简单的图片和音频播放器，如果不会用，点击setting->how to，这里有使用说明－Forever";
-	private Image image;
 	private String imageFilePath = "";
+	private String[] webImages;
 	private File[] files;
+	private URL currentUrl = null;
 	private File currentFile = null;
-	private int fp = 0;// file pointer
 	private boolean isActionFlag = true;
 	private static Logger log = Logger.getLogger(PicPlayer.class);
 	private boolean isPicPlayEnd = false;
@@ -98,17 +103,39 @@ public class PicPlayer {
 
 	public PicPlayer() {
 		String libpath = System.getProperty("java.library.path");
-		System.out.println("TTT:" + libpath);
-//    	System.loadLibrary("casampledsp");
-		initComponent();
+		log.info("PATH:" + libpath);
+		try {
+			initComponent();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	private void initComponent() {
+	private void initComponent() throws IOException {
 		log.info("Here we are in initComponent method.");
-		String cp = "/images";
-
-		System.out.println( getClass().getResource("/images"));
-		imageFilePath = getClass().getResource("/images").getPath();// "src/main/resources/images";//System.getProperty("user.dir") + File.separatorChar + 
+		
+		CodeSource src = getClass().getProtectionDomain().getCodeSource();
+		if (src != null) {
+		  URL jar = src.getLocation();
+		  System.out.println("jar:" + jar);
+		  ZipInputStream zip = new ZipInputStream(jar.openStream());
+		  while(true) {
+		    ZipEntry e = zip.getNextEntry();
+		    System.out.println("e:" + e);
+		    if (e == null)
+		      break;
+		    String name = e.getName();
+		    System.out.println("name:" + name);
+		    if (name.startsWith("resources/images/") && name.endsWith(".jpg")) {
+		    	System.out.println("Success:" + name);
+		    }
+		  }
+		} else {
+			System.out.println("Fail:");
+		}
+		
+		imageFilePath = getClass().getResource("/images").getPath();//direct run
+//		imageFilePath = getClass().getResource("/resources/images").getPath(); 
 		log.info("Image File Path:" + imageFilePath);
 		//mp3path = imageFilePath + File.separatorChar + "Bo-toxx mind Society-Cheeno.mp3";
 		frame = new JFrame();
@@ -129,7 +156,7 @@ public class PicPlayer {
 
 		exitItem = new JMenuItem("Exit");
 		aboutItem = new JMenuItem("About Author");
-		howtoItem = new JMenuItem("how to");
+		howtoItem = new JMenuItem("How to");
 		imageSettingItem = new JMenuItem("Pictures Path Setting");
 
 		exitItem.addActionListener(new ActionListener() {
@@ -175,7 +202,7 @@ public class PicPlayer {
 					@Override
 					public String getDescription() {
 						// TODO Auto-generated method stub
-						return "Image Support(*.png/gif/jpg)";
+						return "Image Support(*.png/jpg)";
 					}
 				};
 				fc.setFileFilter(fileFilter);
@@ -187,7 +214,7 @@ public class PicPlayer {
 					log.info("i am in the imageSettingItems!");
 					log.info(fc.getSelectedFile().getAbsolutePath() + "$$$$$$" + fc.getSelectedFile().getName());
 					imageFilePath = fc.getSelectedFile().getAbsolutePath();
-					image = Toolkit.getDefaultToolkit().getImage(imageFilePath);
+//					image = Toolkit.getDefaultToolkit().getImage(imageFilePath);
 					File file = new File(imageFilePath);
 					files = file.listFiles(new PicFilter());
 					playPic();
@@ -329,22 +356,22 @@ public class PicPlayer {
 
 		imagepanel.add(label);
 		jsp = new JScrollPane(imagepanel);
-		frame.add(processPanel, BorderLayout.NORTH);
+//		frame.add(processPanel, BorderLayout.NORTH);
 		frame.add(jsp, BorderLayout.CENTER);
-		image = Toolkit.getDefaultToolkit().getImage(imageFilePath);
 		File file = new File(imageFilePath);
+		System.out.println("file test:" + file.listFiles());
 		System.out.println("imageFilePath:" + imageFilePath);
-		//files = new File[]{new File("com/luchenghao/jpgPlayer/images/IMG_1751.JPG"), new File("com/luchenghao/jpgPlayer/images/IMG_1752.JPG")};//
-		files = file.listFiles(new PicFilter());
-
+		files = new File[]{new File(imageFilePath+"/1399522307.jpg"), new File(imageFilePath+"/1406932098.jpg"), new File("resources/images/191715820.jpg") , new File("resources/images/455590920.jpg") , new File("resources/images/701747985.jpg") , new File("resources/images/854304604.jpg") , new File("resources/images/869582792.jpg")};//
+//		files = file.listFiles(new PicFilter());
+		webImages = new String[]{"1399522307.jpg", "1406932098.jpg", "191715820.jpg" , "455590920.jpg" , "701747985.jpg" , "854304604.jpg" , "869582792.jpg"};
+		System.out.println("files list:" + files);
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-		frame.setResizable(false);// disable the max button
+		frame.setResizable(true);// disable the max button
 		playPic();
-		// playMp3();
-		audioFilePath =  getClass().getResource("/").getPath() + audioFilePath;
-		System.out.println("Test Path:" + getClass().getResource("/").getPath());
+		audioFilePath =  getClass().getResource("/").getPath() + audioFilePath;//direct run
+//		audioFilePath =  getClass().getResource("/resources/").getPath() + audioFilePath;
 		playback();
 	}
 
@@ -378,7 +405,10 @@ public class PicPlayer {
 	private boolean isPlaying = false;
 	private boolean isPause = false;
 	Thread playbackThread;
+	URL audioUrl = getClass().getResource("/untilTheEndOfTheWorld.mp3");//untilTheEndOfTheWorld.mp3
+	
 	protected void playback() {
+		System.out.println("audioUrl:" + audioUrl);
 		timer = new PlayingTimer(labelTimeCounter, sliderTime);
 		timer.start();
 		isPlaying = true;
@@ -392,6 +422,7 @@ public class PicPlayer {
 					btnPause.setText("Pause");
 					btnPause.setEnabled(true);
 //					mp3path = audioFilePath;
+					System.out.println("audioUrl:" + audioUrl);
 					player.load(audioFilePath);
 //					FileInputStream fis = new FileInputStream(mp3path);
 //					BufferedInputStream bis = new BufferedInputStream(fis);
@@ -464,49 +495,49 @@ public class PicPlayer {
 
 	private AudioPlayer player = new AudioPlayer();
 
-	class JlThread implements Runnable {
+//	class JlThread implements Runnable {
+//
+//		@Override
+//		public void run() {
+//			try {
+//				player.play();
+//				if (!player.getAudioClip().isRunning()) {
+//					log.info("mp3 play completed");
+//					playMusic();
+//				}
+//			} catch (Exception e) {
+//				log.info(e);
+//			}
+//		}
+//	}
 
-		@Override
-		public void run() {
-			try {
-				player.play();
-				if (!player.getAudioClip().isRunning()) {
-					log.info("mp3 play completed");
-					playMusic();
-				}
-			} catch (Exception e) {
-				log.info(e);
-			}
-		}
-	}
-
-	public void playMusic() {
-		try {
-//			FileInputStream fis = new FileInputStream(mp3path);
-//			BufferedInputStream bis = new BufferedInputStream(fis);
-			player.load(mp3path);
-			
-		} catch (Exception e) {
-			log.info("Problem playing file " + mp3path);
-			log.info(e);
-		}
-
-		// run in new thread to play in background
-		// new Thread() {
-		// public void run() {
-		// try {
-		// player.play();
-		// if (player.isComplete()) {
-		// log.info("mp3 play completed");
-		// player.play();
-		// }
-		// } catch (Exception e) {
-		// log.info(e);
-		// }
-		// }
-		// }.start();
-		new Thread(new JlThread()).start();
-	}
+//	public void playMusic() {
+//		try {
+////			FileInputStream fis = new FileInputStream(mp3path);
+////			BufferedInputStream bis = new BufferedInputStream(fis);
+//			player.load(mp3path);
+//			
+//		} catch (Exception e) {
+//			log.info("Problem playing file " + mp3path);
+//			log.info(e);
+//		}
+//
+//		// run in new thread to play in background
+//		// new Thread() {
+//		// public void run() {
+//		// try {
+//		// player.play();
+//		// if (player.isComplete()) {
+//		// log.info("mp3 play completed");
+//		// player.play();
+//		// }
+//		// } catch (Exception e) {
+//		// log.info(e);
+//		// }
+//		// }
+//		// }.start();
+//		new Thread(new JlThread()).start();
+//	}
 
 	private void playMp3() {
 		log.info("Mp3 location:" + mp3path);
@@ -592,10 +623,15 @@ public class PicPlayer {
 		@Override
 		public void run() {
 			isPicPlayEnd = false;
-			System.out.println("files:"+ files);
+			System.out.println(CLASS+ files);
+			System.out.println("Image Size:" + files.length);
 			log.info("Image Size:" + files.length);
+//			URL currentUrl = null;
 			for (int i = 0; i < files.length; i++) {
 				currentFile = files[i];
+//				currentUrl = this.getClass().getResource("/resources/images/"+webImages[i]);
+				currentUrl = this.getClass().getResource("/images/"+webImages[i]);
+				System.out.println("currentUrl:" + currentUrl);
 				log.info(currentFile);
 				isActionFlag = true;
 				try {
@@ -618,9 +654,44 @@ public class PicPlayer {
 			}
 		}
 
+		private void setImageByURL(URL currentFile, boolean isActionFlag) {
+			// TODO Auto-generated method stub
+//			imgIcon = new ImageIcon(currentFile.getPath());
+			imgIcon = new ImageIcon(currentFile);
+			System.out.println("Pic Path: " + currentFile.getPath());
+			log.info("Pic Path: " + currentFile.getPath());
+			int cw;
+			int ch;
+			int iw = imgIcon.getIconWidth();
+			int ih = imgIcon.getIconHeight();
+			if (isActionFlag) {
+				cw = jsp.getWidth();
+				ch = jsp.getHeight();
+				if (iw > cw || ih > ch) {
+					if (cw / ch > iw / ih) {
+						iw = iw * (ch - 50) / ih;
+						ih = ch - 50;
+						imgIcon.setImage(setFixedByURL(currentFile, iw, ih));
+					} else {
+						ih = (cw - 50) * ih / iw;
+						iw = cw - 50;
+						imgIcon.setImage(setFixedByURL(currentFile, iw, ih));
+					}
+				}
+				imagepanel.setLayout(null);
+				label.setBounds((cw - iw) / 2, (ch - ih) / 2, iw, ih);
+			} else {
+				cw = imagepanel.getWidth();
+				ch = imagepanel.getHeight();
+				imagepanel.setLayout(new java.awt.FlowLayout());
+			}
+			label.setIcon(imgIcon);
+		}
+		
 		private void setImage(File currentFile, boolean isActionFlag) {
 			// TODO Auto-generated method stub
 			imgIcon = new ImageIcon(currentFile.getPath());
+			System.out.println("Pic Path: " + currentFile.getPath());
 			log.info("Pic Path: " + currentFile.getPath());
 			int cw;
 			int ch;
@@ -650,6 +721,16 @@ public class PicPlayer {
 			label.setIcon(imgIcon);
 		}
 
+		private Image setFixedByURL(URL currentFile, int iw, int ih) {
+			BufferedImage bi = null;
+			try {
+				bi = javax.imageio.ImageIO.read(currentFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return bi.getScaledInstance(iw, ih, Image.SCALE_SMOOTH);
+		}
+		
 		private Image setFixed(File currentFile, int iw, int ih) {
 			BufferedImage bi = null;
 			try {
