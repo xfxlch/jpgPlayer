@@ -138,13 +138,12 @@ public class PicPlayer {
 //		imageFilePath = getClass().getResource("/resources/images").getPath(); 
 		log.info("Image File Path:" + imageFilePath);
 		//mp3path = imageFilePath + File.separatorChar + "Bo-toxx mind Society-Cheeno.mp3";
-		frame = new JFrame();
+		frame = new JFrame(title);
 		frame.setSize(WIDTH, HEIGHT);
 		int w = (Toolkit.getDefaultToolkit().getScreenSize().width - WIDTH) / 2;
 		int h = (Toolkit.getDefaultToolkit().getScreenSize().height - HEIGHT) / 2;
 		System.out.println("x:" + w + ", y:" +h );
 		frame.setLocation(w, h);
-		frame.setTitle(title);
 		menubar = new JMenuBar();
 		frame.setJMenuBar(menubar);
 		fileMenu = new JMenu("File");
@@ -321,8 +320,7 @@ public class PicPlayer {
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.insets = new Insets(2, 2, 2, 2);
 		constraints.anchor = GridBagConstraints.WEST;
-		// constraints.fill = GridBagConstraints.HORIZONTAL;//shui ping kuo
-		// zhang zujian
+		// constraints.fill = GridBagConstraints.HORIZONTAL;
 
 		sliderTime.setPreferredSize(new Dimension(400, 20));
 		sliderTime.setEnabled(false);
