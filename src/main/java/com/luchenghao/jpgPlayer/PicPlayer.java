@@ -114,26 +114,26 @@ public class PicPlayer {
 	private void initComponent() throws IOException {
 		log.info("Here we are in initComponent method.");
 		
-		CodeSource src = getClass().getProtectionDomain().getCodeSource();
-		if (src != null) {
-		  URL jar = src.getLocation();
-		  System.out.println("jar:" + jar);
-		  ZipInputStream zip = new ZipInputStream(jar.openStream());
-		  while(true) {
-		    ZipEntry e = zip.getNextEntry();
-		    System.out.println("e:" + e);
-		    if (e == null)
-		      break;
-		    String name = e.getName();
-		    System.out.println("name:" + name);
-		    if (name.startsWith("resources/images/") && name.endsWith(".jpg")) {
-		    	System.out.println("Success:" + name);
-		    }
-		  }
-		} else {
-			System.out.println("Fail:");
-		}
-		
+//		CodeSource src = getClass().getProtectionDomain().getCodeSource();
+//		if (src != null) {
+//		  URL jar = src.getLocation();
+//		  System.out.println("jar:" + jar);
+//		  ZipInputStream zip = new ZipInputStream(jar.openStream());
+//		  while(true) {
+//		    ZipEntry e = zip.getNextEntry();
+//		    System.out.println("e:" + e);
+//		    if (e == null)
+//		      break;
+//		    String name = e.getName();
+//		    System.out.println("name:" + name);
+//		    if (name.startsWith("resources/images/") && name.endsWith(".jpg")) {
+//		    	System.out.println("Success:" + name);
+//		    }
+//		  }
+//		} else {
+//			System.out.println("Fail:");
+//		}
+		System.out.println("Class Name:" + getClass().getName()+",XX"+"\u4e01");
 		imageFilePath = getClass().getResource("/images").getPath();//direct run
 //		imageFilePath = getClass().getResource("/resources/images").getPath(); 
 		log.info("Image File Path:" + imageFilePath);
@@ -168,7 +168,7 @@ public class PicPlayer {
 		aboutItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				javax.swing.JOptionPane.showMessageDialog(frame, "Author:Luchenghao \nmailto:luch2046@gmail.com",
+				javax.swing.JOptionPane.showMessageDialog(frame, "Author:Luchenghao \nmailto:luch2046#gmail.com",
 						"关于作者", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
@@ -176,7 +176,7 @@ public class PicPlayer {
 		howtoItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				javax.swing.JOptionPane.showConfirmDialog(frame, "使用很简单，就两步操作：\n 1. 在Setting->Pic Path Chooser 指定一个本地电脑有.jpg/.gif/.png文件的一个目录，用来播放图片。\n 2. 在窗口上部的Open File 按钮上选中一个mp3文件，用来播放音频。 \n 就这么简单。",
+				javax.swing.JOptionPane.showConfirmDialog(frame, "使用很简单，就两步操作：\n 1. 在Setting->Pic Path Chooser 指定一个本地电脑有.png/.jpg文件的一个目录，用来播放图片。\n 2. 在窗口上部的Open File 按钮上选中一个mp3文件，用来播放音频。 \n 就这么简单。",
 						"关于使用", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
@@ -211,7 +211,7 @@ public class PicPlayer {
 				int userChoice = fc.showOpenDialog(frame);
 				if (userChoice == JFileChooser.APPROVE_OPTION) {
 					log.info("i am in the imageSettingItems!");
-					log.info(fc.getSelectedFile().getAbsolutePath() + "$$$$$$" + fc.getSelectedFile().getName());
+					log.info(fc.getSelectedFile().getAbsolutePath() + " with name:" + fc.getSelectedFile().getName());
 					imageFilePath = fc.getSelectedFile().getAbsolutePath();
 //					image = Toolkit.getDefaultToolkit().getImage(imageFilePath);
 					File file = new File(imageFilePath);

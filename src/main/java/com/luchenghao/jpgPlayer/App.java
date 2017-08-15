@@ -9,8 +9,7 @@ import org.apache.log4j.Logger;
  */
 public class App implements Runnable {
 	private static Logger log = Logger.getLogger(App.class);
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) {
     	log.info( "Hello World!" );
     	SwingUtilities.invokeLater(new App());
     }
