@@ -15,9 +15,9 @@ public class App implements Runnable {
 	private static Logger log = Logger.getLogger(App.class);
     public static void main( String[] args ) {
     	log.info( "Hello World!" );
-//    	SwingUtilities.invokeLater(new App("Main Thread"));
-    	Thread thread = new Thread(new App(), "Main Thread");
-    	thread.start();
+    	SwingUtilities.invokeLater(new App("Main Thread"));
+//    	Thread thread = new Thread(new App(), "Main Thread");
+//    	thread.start();
     }
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
